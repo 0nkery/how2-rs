@@ -1,26 +1,21 @@
 // Brief implementation of the 'node-google'
 // node.js package.
-
-extern crate hyper;
-extern crate select;
-extern crate regex;
-
 use std::io::Read;
 
-use self::hyper::Client;
-use self::hyper::header::Connection;
+use super::hyper::Client;
+use super::hyper::header::Connection;
 
-use self::select::document::Document;
-use self::select::predicate::Class;
-use self::select::predicate::Name;
-use self::select::predicate::And;
+use super::select::document::Document;
+use super::select::predicate::Class;
+use super::select::predicate::Name;
+use super::select::predicate::And;
 
-use self::regex::Regex;
+use super::regex::Regex;
 
 
 #[derive(Debug)]
 pub struct GoogleResult {
-    link: String,
+    pub link: String,
 }
 
 impl GoogleResult {
