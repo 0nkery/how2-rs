@@ -1,0 +1,9 @@
+[package]
+name = "how2-rs"
+version = "0.1.0"
+authors = ["Dmitry Shlagoff <wessmoke@mail.ru>"]
+
+[dependencies]
+hyper = "0.8.1"
+select = "0.3.0"
+regex = "0.1.66"
