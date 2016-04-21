@@ -18,8 +18,8 @@ fn main() {
     // println!("{:?}", links);
 
     let api = StackExchangeApi::new();
-    let answers = api.fetch_answers("http://stackoverflow.\
-                                     com/questions/36713164/list-all-photo-albums-in-ios");
+    let answers = api.answers("http://stackoverflow.\
+                               com/questions/36713164/list-all-photo-albums-in-ios");
 
     println!("{:?}", answers);
 }

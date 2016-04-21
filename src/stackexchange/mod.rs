@@ -13,7 +13,7 @@ use super::rustc_serialize::json::Json;
 use super::flate2::read::GzDecoder;
 
 use google::GoogleResult;
-use self::data::StackExchangeAnswerMeta;
+use self::data::StackExchangeAnswer;
 
 
 pub struct StackExchangeApi {
@@ -34,7 +34,7 @@ impl StackExchangeApi {
         }
     }
 
-    pub fn fetch_answers(&self, url: &str) -> Result<Vec<StackExchangeAnswerMeta>, String> {
+    pub fn answers(&self, url: &str) -> Result<Vec<StackExchangeAnswer>, String> {
         let quiestion_id: &str;
         let site: &str;
 
@@ -55,19 +55,12 @@ impl StackExchangeApi {
 
         let quiestion_id: u64 = quiestion_id.parse::<u64>().unwrap();
 
-        Ok(self.query(site, quiestion_id))
+        Ok(self.query(site, quiestion_id, 20))
     }
 
-    fn query(&self, site: &str, quiestion_id: u64) -> Vec<StackExchangeAnswerMeta> {
-        let url = format!("{}://{}/{}/questions/{}/answers?site={}",
-                          self.protocol,
-                          self.api,
-                          self.version,
-                          quiestion_id,
-                          site);
-
+    fn request(&self, url: &str) -> String {
         let mut res = self.client
-                          .get(&url)
+                          .get(url)
                           .header(Connection::close())
                           .send()
                           .unwrap();
@@ -79,15 +72,64 @@ impl StackExchangeApi {
         let mut body = String::new();
         gzip_decoder.read_to_string(&mut body).unwrap();
 
-        let response = Json::from_str(&body).unwrap();
-        let data = response.as_object().unwrap();
+        body
+    }
+
+    fn from_json(&self, json_str: &str) -> Vec<StackExchangeAnswer> {
+        let json = Json::from_str(&json_str).unwrap();
+        let data = json.as_object().unwrap();
         let items = data.get("items").unwrap().as_array().unwrap();
 
-        let answers: Vec<StackExchangeAnswerMeta> = items.iter()
-                                                         .map(|i| {
-                                                             json::decode(&i.to_string()).unwrap()
-                                                         })
-                                                         .collect();
+        let answers: Vec<StackExchangeAnswer> = items.iter()
+                                                     .map(|i| {
+                                                         json::decode(&i.to_string()).unwrap()
+                                                     })
+                                                     .collect();
+
+        answers
+    }
+
+    fn query_meta(&self,
+                  site: &str,
+                  quiestion_id: u64,
+                  max_count: usize)
+                  -> Vec<StackExchangeAnswer> {
+        let url = format!("{}://{}/{}/questions/{}/answers?site={}",
+                          self.protocol,
+                          self.api,
+                          self.version,
+                          quiestion_id,
+                          site);
+
+        let response = self.request(&url);
+        let mut answers = self.from_json(&response);
+        answers.sort_by_key(|a| -a.score);
+
+        let chosen_answers = answers.drain(0..)
+                                    .filter(|a| a.score > 0)
+                                    .take(max_count)
+                                    .collect();
+
+        chosen_answers
+    }
+
+    fn query(&self, site: &str, quiestion_id: u64, max_count: usize) -> Vec<StackExchangeAnswer> {
+        let answers_meta = self.query_meta(site, quiestion_id, max_count);
+
+        let answer_ids = answers_meta.iter()
+                                     .map(|a| a.answer_id.to_string())
+                                     .collect::<Vec<_>>()
+                                     .join(";");
+
+        let url = format!("{}://{}/{}/answers/{}/?site={}&filter=withbody",
+                          self.protocol,
+                          self.api,
+                          self.version,
+                          answer_ids,
+                          site);
+
+        let response = self.request(&url);
+        let answers = self.from_json(&response);
 
         answers
     }
