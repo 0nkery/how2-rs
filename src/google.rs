@@ -27,11 +27,15 @@ impl GoogleResult {
 
 pub struct Google {
     per_page: usize,
+    client: Client,
 }
 
 impl Default for Google {
     fn default() -> Self {
-        Google { per_page: 10 }
+        Google {
+            per_page: 10,
+            client: Client::new(),
+        }
     }
 }
 
@@ -43,7 +47,10 @@ impl Google {
             per_page = 100;
         }
 
-        Google { per_page: per_page }
+        Google {
+            per_page: per_page,
+            client: Client::new(),
+        }
     }
 
     pub fn google(&self, query: &str) -> Vec<GoogleResult> {
@@ -57,11 +64,11 @@ impl Google {
                           query,
                           self.per_page);
 
-        let client = Client::new();
-        let mut res = client.get(&url)
-                            .header(Connection::close())
-                            .send()
-                            .unwrap();
+        let mut res = self.client
+                          .get(&url)
+                          .header(Connection::close())
+                          .send()
+                          .unwrap();
 
         let mut body = String::new();
         res.read_to_string(&mut body).unwrap();

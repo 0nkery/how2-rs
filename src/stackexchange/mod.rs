@@ -54,6 +54,7 @@ impl StackExchangeApi {
         }
 
         let quiestion_id: u64 = quiestion_id.parse::<u64>().unwrap();
+
         Ok(self.query(site, quiestion_id))
     }
 
@@ -70,10 +71,9 @@ impl StackExchangeApi {
                           .send()
                           .unwrap();
 
-        println!("{}", res.status);
-
         let mut buffer = Vec::new();
         res.read_to_end(&mut buffer);
+
         let mut gzip_decoder = GzDecoder::new(buffer.as_slice()).unwrap();
         let mut body = String::new();
         gzip_decoder.read_to_string(&mut body).unwrap();
