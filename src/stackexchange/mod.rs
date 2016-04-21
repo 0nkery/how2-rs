@@ -18,7 +18,6 @@ use self::data::StackExchangeAnswerMeta;
 
 pub struct StackExchangeApi {
     api: &'static str,
-    version: &'static str,
     protocol: &'static str,
     client: Client,
 }
@@ -29,7 +28,6 @@ impl StackExchangeApi {
         StackExchangeApi {
             api: "api.stackexchange.com",
             protocol: "https",
-            version: "2.2",
             client: Client::new(),
         }
     }
