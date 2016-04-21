@@ -25,6 +25,7 @@ impl GoogleResult {
 }
 
 
+#[derive(Debug)]
 pub struct Google {
     per_page: usize,
     client: Client,
@@ -109,6 +110,7 @@ impl Google {
                                            .unwrap()
                                            .name("link")
                                            .unwrap();
+
             results.push(GoogleResult::new(&clean_link));
         }
 
