@@ -12,3 +12,9 @@ pub struct StackExchangeAnswerMeta {
     pub score: i32,
     pub answer_id: u64,
 }
+
+
+#[derive(RustcDecodable, Debug)]
+pub struct StackExchangeAnswer {
+
+}

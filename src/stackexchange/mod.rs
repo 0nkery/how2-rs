@@ -19,6 +19,7 @@ use self::data::StackExchangeAnswerMeta;
 pub struct StackExchangeApi {
     api: &'static str,
     protocol: &'static str,
+    version: &'static str,
     client: Client,
 }
 
@@ -28,6 +29,7 @@ impl StackExchangeApi {
         StackExchangeApi {
             api: "api.stackexchange.com",
             protocol: "https",
+            version: "2.2",
             client: Client::new(),
         }
     }
@@ -57,9 +59,10 @@ impl StackExchangeApi {
     }
 
     fn query(&self, site: &str, quiestion_id: u64) -> Vec<StackExchangeAnswerMeta> {
-        let url = format!("{}://{}/questions/{}/answers?site={}",
+        let url = format!("{}://{}/{}/questions/{}/answers?site={}",
                           self.protocol,
                           self.api,
+                          self.version,
                           quiestion_id,
                           site);
 
