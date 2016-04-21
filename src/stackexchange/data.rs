@@ -6,7 +6,7 @@ pub struct StackExchangeUser {
 
 
 #[derive(RustcDecodable, Debug)]
-pub struct StackExchangeAnswer {
+pub struct StackExchangeAnswerMeta {
     pub owner: StackExchangeUser,
     pub is_accepted: bool,
     pub score: i32,

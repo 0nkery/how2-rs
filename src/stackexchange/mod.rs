@@ -13,7 +13,7 @@ use super::rustc_serialize::json::Json;
 use super::flate2::read::GzDecoder;
 
 use google::GoogleResult;
-use self::data::StackExchangeAnswer;
+use self::data::StackExchangeAnswerMeta;
 
 
 pub struct StackExchangeApi {
@@ -34,19 +34,19 @@ impl StackExchangeApi {
         }
     }
 
-    pub fn fetch_answers(&self, result: &GoogleResult) -> Result<Vec<StackExchangeAnswer>, String> {
+    pub fn fetch_answers(&self, url: &str) -> Result<Vec<StackExchangeAnswerMeta>, String> {
         let quiestion_id: &str;
         let site: &str;
 
-        if result.link.contains("stackoverflow.com") {
+        if url.contains("stackoverflow.com") {
             let re = Regex::new(r".*stackoverflow.com/questions/(?P<q_id>\d+)/").unwrap();
-            let captures = re.captures(&result.link).unwrap();
+            let captures = re.captures(&url).unwrap();
             quiestion_id = captures.name("q_id").unwrap();
             site = "stackoverflow".into();
-        } else if result.link.contains("stackexchange.com") {
+        } else if url.contains("stackexchange.com") {
             let re = Regex::new(r".*//(?P<site>.*).stackexchange.com/questions/(?P<q_id>\d+)/")
                          .unwrap();
-            let captures = re.captures(&result.link).unwrap();
+            let captures = re.captures(&url).unwrap();
             quiestion_id = captures.name("q_id").unwrap();
             site = captures.name("site").unwrap();
         } else {
@@ -58,7 +58,7 @@ impl StackExchangeApi {
         Ok(self.query(site, quiestion_id))
     }
 
-    fn query(&self, site: &str, quiestion_id: u64) -> Vec<StackExchangeAnswer> {
+    fn query(&self, site: &str, quiestion_id: u64) -> Vec<StackExchangeAnswerMeta> {
         let url = format!("{}://{}/questions/{}/answers?site={}",
                           self.protocol,
                           self.api,
@@ -82,11 +82,11 @@ impl StackExchangeApi {
         let data = response.as_object().unwrap();
         let items = data.get("items").unwrap().as_array().unwrap();
 
-        let answers: Vec<StackExchangeAnswer> = items.iter()
-                                                     .map(|i| {
-                                                         json::decode(&i.to_string()).unwrap()
-                                                     })
-                                                     .collect();
+        let answers: Vec<StackExchangeAnswerMeta> = items.iter()
+                                                         .map(|i| {
+                                                             json::decode(&i.to_string()).unwrap()
+                                                         })
+                                                         .collect();
 
         answers
     }
