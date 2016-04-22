@@ -24,7 +24,7 @@ impl StackExchangeAnswer {
         match self.body {
             None => String::new(),
             Some(ref body) => {
-                let re = Regex::new(r"<.*>").unwrap();
+                let re = Regex::new(r"<.+?>").unwrap();
                 re.replace_all(&body, "")
             }
         }
