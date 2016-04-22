@@ -128,7 +128,8 @@ impl StackExchangeApi {
                           site);
 
         let response = self.request(&url);
-        let answers = self.from_json(&response);
+        let mut answers = self.from_json(&response);
+        answers.sort_by_key(|a| -a.score);
 
         answers
     }

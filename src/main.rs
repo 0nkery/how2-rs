@@ -20,12 +20,12 @@ fn main() {
     for link in links.iter() {
         match api.answers(&link.link) {
             Ok(ref mut link_answers) => answers.append(link_answers),
-            Err(text) => {
-                println!("{}", text);
-            }
+            Err(_) => {}
         }
     }
+    answers.sort_by_key(|a| -a.score);
 
-
-    println!("{:?}", answers);
+    for answer in answers.iter() {
+        println!("{}\n-----", answer);
+    }
 }

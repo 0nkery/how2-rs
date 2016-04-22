@@ -1,3 +1,7 @@
+use std::fmt;
+
+use regex::Regex;
+
 #[derive(RustcDecodable, Debug)]
 pub struct StackExchangeUser {
     pub reputation: i32,
@@ -17,10 +21,18 @@ pub struct StackExchangeAnswer {
 
 impl StackExchangeAnswer {
     fn simple_print(&self) -> String {
-        if !self.body.is_some() {
-            return String::new();
+        match self.body {
+            None => String::new(),
+            Some(ref body) => {
+                let re = Regex::new(r"<.*>").unwrap();
+                re.replace_all(&body, "")
+            }
         }
+    }
+}
 
-        String::new()
+impl fmt::Display for StackExchangeAnswer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.simple_print())
     }
 }
