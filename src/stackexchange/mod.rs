@@ -12,7 +12,6 @@ use super::rustc_serialize::json::Json;
 
 use super::flate2::read::GzDecoder;
 
-use google::GoogleResult;
 use self::data::StackExchangeAnswer;
 
 
@@ -66,7 +65,7 @@ impl StackExchangeApi {
                           .unwrap();
 
         let mut buffer = Vec::new();
-        res.read_to_end(&mut buffer);
+        res.read_to_end(&mut buffer).unwrap();
 
         let mut gzip_decoder = GzDecoder::new(buffer.as_slice()).unwrap();
         let mut body = String::new();

@@ -8,18 +8,24 @@ extern crate select;
 extern crate flate2;
 
 use google::Google;
-use google::GoogleResult;
 use stackexchange::StackExchangeApi;
 
 fn main() {
-    // let google = Google::default();
-    // let links = google.google("rust");
-
-    // println!("{:?}", links);
+    let google = Google::default();
+    let links = google.google("python unittest skip base class");
 
     let api = StackExchangeApi::new();
-    let answers = api.answers("http://stackoverflow.\
-                               com/questions/36713164/list-all-photo-albums-in-ios");
+
+    let mut answers = Vec::new();
+    for link in links.iter() {
+        match api.answers(&link.link) {
+            Ok(ref mut link_answers) => answers.append(link_answers),
+            Err(text) => {
+                println!("{}", text);
+            }
+        }
+    }
+
 
     println!("{:?}", answers);
 }
