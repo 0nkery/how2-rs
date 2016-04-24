@@ -54,18 +54,18 @@ fn main() {
         max_answers_count = 5;
     }
 
+    let query = matches.free.join(" ");
+
     let google = Google::default();
-    let links = google.google(&matches.free.join(" "));
+    let links = google.google(&query);
+    let links_urls = links.iter()
+                          .map(|l| l.link.as_str())
+                          .collect();
 
     let api = StackExchangeApi::new();
 
-    let mut answers = Vec::new();
-    for link in links.iter() {
-        match api.answers(&link.link) {
-           Ok(ref mut link_answers) => answers.append(link_answers) ,
-           Err(_) => {}
-        }
-    }
+    let mut answers = api.answers(links_urls);
+
     answers.sort_by_key(|a| -a.score);
     let left_answers: Vec<_> = answers.iter().take(max_answers_count).collect();
 

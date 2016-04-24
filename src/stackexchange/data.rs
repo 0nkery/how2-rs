@@ -2,6 +2,21 @@ use std::fmt;
 
 use regex::Regex;
 
+
+#[derive(Debug)]
+pub struct StackExchangeQuestion {
+    pub id: u64,
+    pub site: String
+}
+
+
+impl StackExchangeQuestion {
+    pub fn new(id: u64, site: &str) -> Self {
+        StackExchangeQuestion { id: id, site: site.into() }
+    }
+}
+
+
 #[derive(RustcDecodable, Debug)]
 pub struct StackExchangeUser {
     pub reputation: i32,

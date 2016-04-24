@@ -1,6 +1,7 @@
 mod data;
 
 use std::io::Read;
+use std::collections::BTreeMap;
 
 use super::regex::Regex;
 
@@ -13,6 +14,7 @@ use super::rustc_serialize::json::Json;
 use super::flate2::read::GzDecoder;
 
 use self::data::StackExchangeAnswer;
+use self::data::StackExchangeQuestion;
 
 
 pub struct StackExchangeApi {
@@ -33,28 +35,38 @@ impl StackExchangeApi {
         }
     }
 
-    pub fn answers(&self, url: &str) -> Result<Vec<StackExchangeAnswer>, String> {
-        let quiestion_id: &str;
-        let site: &str;
+    pub fn answers(&self, urls: Vec<&str>) -> Vec<StackExchangeAnswer> {
+        let questions = self.parse_questions(urls);
+        self.query(questions)
+    }
 
-        if url.contains("stackoverflow.com") {
-            let re = Regex::new(r".*stackoverflow.com/questions/(?P<q_id>\d+)/").unwrap();
-            let captures = re.captures(&url).unwrap();
-            quiestion_id = captures.name("q_id").unwrap();
-            site = "stackoverflow".into();
-        } else if url.contains("stackexchange.com") {
-            let re = Regex::new(r".*//(?P<site>.*).stackexchange.com/questions/(?P<q_id>\d+)/")
-                         .unwrap();
-            let captures = re.captures(&url).unwrap();
-            quiestion_id = captures.name("q_id").unwrap();
-            site = captures.name("site").unwrap();
-        } else {
-            return Err("Result is not related to StackExchange.".into());
+    fn parse_questions(&self, urls: Vec<&str>) -> Vec<StackExchangeQuestion> {
+        let mut questions = Vec::new();
+
+        for url in urls.iter() {
+            let question_id;
+            let site;
+
+            if url.contains("stackoverflow.com") {
+                let re = Regex::new(r".*stackoverflow.com/questions/(?P<q_id>\d+)/").unwrap();
+                let captures = re.captures(&url).unwrap();
+                question_id = captures.name("q_id").unwrap();
+                site = "stackoverflow".into();
+            } else if url.contains("stackexchange.com") {
+                let re = Regex::new(r".*//(?P<site>.*).stackexchange.com/questions/(?P<q_id>\d+)/")
+                             .unwrap();
+                let captures = re.captures(&url).unwrap();
+                question_id = captures.name("q_id").unwrap();
+                site = captures.name("site").unwrap();
+            } else {
+                continue;
+            }
+
+            let question_id: u64 = question_id.parse::<u64>().unwrap();
+
+            questions.push(StackExchangeQuestion::new(question_id, site));
         }
-
-        let quiestion_id: u64 = quiestion_id.parse::<u64>().unwrap();
-
-        Ok(self.query(site, quiestion_id))
+        questions
     }
 
     fn request(&self, url: &str) -> String {
@@ -88,43 +100,36 @@ impl StackExchangeApi {
         answers
     }
 
-    fn query_meta(&self,
-                  site: &str,
-                  quiestion_id: u64)
-                  -> Vec<StackExchangeAnswer> {
-        let url = format!("{}://{}/{}/questions/{}/answers?site={}",
-                          self.protocol,
-                          self.api,
-                          self.version,
-                          quiestion_id,
-                          site);
+    fn query(&self, questions: Vec<StackExchangeQuestion>) -> Vec<StackExchangeAnswer> {
+        let mut answers = Vec::new();
+        let mut by_site = BTreeMap::new();
 
-        let response = self.request(&url);
-        let mut answers = self.from_json(&response);
+        for q in questions.iter() {
+            if !by_site.contains_key(&q.site) {
+                let questions_same_site = questions.iter()
+                                                   .filter(|que| que.site == q.site)
+                                                   .collect::<Vec<_>>();
+                by_site.insert(&q.site, questions_same_site);
+            }
+        }
 
-        let chosen_answers: Vec<_> = answers.drain(0..)
-                                    .filter(|a| a.score > 0)
-                                    .collect();
-        chosen_answers
-    }
+        for (site, site_questions) in by_site.iter() {
+            let question_ids: String = site_questions.iter()
+                                             .map(|q| q.id.to_string())
+                                             .collect::<Vec<_>>()
+                                             .join(";");
 
-    fn query(&self, site: &str, quiestion_id: u64) -> Vec<StackExchangeAnswer> {
-        let answers_meta = self.query_meta(site, quiestion_id);
+            let url = format!("{}://{}/{}/questions/{}/answers/?site={}&filter=withbody",
+                              self.protocol,
+                              self.api,
+                              self.version,
+                              question_ids,
+                              site);
 
-        let answer_ids = answers_meta.iter()
-                                     .map(|a| a.answer_id.to_string())
-                                     .collect::<Vec<_>>()
-                                     .join(";");
-
-        let url = format!("{}://{}/{}/answers/{}/?site={}&filter=withbody",
-                          self.protocol,
-                          self.api,
-                          self.version,
-                          answer_ids,
-                          site);
-
-        let response = self.request(&url);
-        let answers = self.from_json(&response);
+            let response = self.request(&url);
+            let mut new_answers = self.from_json(&response);
+            answers.append(&mut new_answers);
+        }
 
         answers
     }
