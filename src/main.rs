@@ -26,8 +26,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     
     let mut opts = Options::new();
-    opts.optopt("m", "max-answers", "maximum answers to retrieve", "COUNT");
-    opts.optflag("h", "help", "show usage");
+    opts.optopt("m", "max-answers", "Maximum answers to retrieve (defaults to 5).", "CNT");
+    opts.optflag("h", "help", "Show usage.");
 
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
