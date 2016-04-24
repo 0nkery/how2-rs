@@ -54,7 +54,7 @@ impl StackExchangeApi {
 
         let quiestion_id: u64 = quiestion_id.parse::<u64>().unwrap();
 
-        Ok(self.query(site, quiestion_id, 20))
+        Ok(self.query(site, quiestion_id))
     }
 
     fn request(&self, url: &str) -> String {
@@ -90,8 +90,7 @@ impl StackExchangeApi {
 
     fn query_meta(&self,
                   site: &str,
-                  quiestion_id: u64,
-                  max_count: usize)
+                  quiestion_id: u64)
                   -> Vec<StackExchangeAnswer> {
         let url = format!("{}://{}/{}/questions/{}/answers?site={}",
                           self.protocol,
@@ -102,18 +101,15 @@ impl StackExchangeApi {
 
         let response = self.request(&url);
         let mut answers = self.from_json(&response);
-        answers.sort_by_key(|a| -a.score);
 
-        let chosen_answers = answers.drain(0..)
+        let chosen_answers: Vec<_> = answers.drain(0..)
                                     .filter(|a| a.score > 0)
-                                    .take(max_count)
                                     .collect();
-
         chosen_answers
     }
 
-    fn query(&self, site: &str, quiestion_id: u64, max_count: usize) -> Vec<StackExchangeAnswer> {
-        let answers_meta = self.query_meta(site, quiestion_id, max_count);
+    fn query(&self, site: &str, quiestion_id: u64) -> Vec<StackExchangeAnswer> {
+        let answers_meta = self.query_meta(site, quiestion_id);
 
         let answer_ids = answers_meta.iter()
                                      .map(|a| a.answer_id.to_string())
@@ -128,8 +124,7 @@ impl StackExchangeApi {
                           site);
 
         let response = self.request(&url);
-        let mut answers = self.from_json(&response);
-        answers.sort_by_key(|a| -a.score);
+        let answers = self.from_json(&response);
 
         answers
     }
