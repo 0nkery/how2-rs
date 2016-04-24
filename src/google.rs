@@ -42,18 +42,6 @@ impl Default for Google {
 
 
 impl Google {
-    pub fn new(results_per_page: usize) -> Self {
-        let mut per_page = results_per_page;
-        if per_page > 100 {
-            per_page = 100;
-        }
-
-        Google {
-            per_page: per_page,
-            client: Client::new(),
-        }
-    }
-
     pub fn google(&self, query: &str) -> Vec<GoogleResult> {
         let body = self.request(query);
         self.get_links(&body)
