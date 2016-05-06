@@ -46,6 +46,10 @@ impl Google {
         self.get_links(&body)
     }
 
+    pub fn per_page(&self) -> usize {
+        self.per_page
+    }
+
     fn request(&self, query: &str) -> String {
         let url = format!("https://www.google.\
                            com/search?hl=en&q={}&start=0&sa=N&num={}&ie=UTF-8&oe=UTF-8&gws_rd=ssl",
@@ -103,4 +107,14 @@ impl Google {
 
         results
     }
+}
+
+
+#[test]
+fn google_works() {
+    let google = Google::default();
+    let results = google.google("rust lang testing");
+
+    assert_eq!(results.len(), google.per_page());
+    assert!(results.iter().any(|r| r.link == "https://doc.rust-lang.org/book/testing.html"));
 }
