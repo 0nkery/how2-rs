@@ -24,14 +24,20 @@ fn print_usage(opts: Options) {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    
+
     let mut opts = Options::new();
-    opts.optopt("m", "max-answers", "Maximum answers to retrieve (defaults to 5).", "CNT");
+    opts.optopt("m",
+                "max-answers",
+                "Maximum answers to retrieve (defaults to 5).",
+                "COUNT");
     opts.optflag("h", "help", "Show usage.");
 
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
-        Err(f) => { println!("{}", f.to_string()); return; }
+        Err(f) => {
+            println!("{}", f.to_string());
+            return;
+        }
     };
 
     if matches.opt_present("h") {
@@ -43,14 +49,23 @@ fn main() {
     if matches.opt_present("m") {
         let count_cli = matches.opt_str("m");
         match count_cli {
-            Some(count_str) => match count_str.parse::<usize>() {
-                Ok(count) => { max_answers_count = count; },
-                Err(_) => { println!("'m' option should be an integer."); return; }
-            },
-            None => { println!("Argument to option 'm' missing."); return; }
+            Some(count_str) => {
+                match count_str.parse::<usize>() {
+                    Ok(count) => {
+                        max_answers_count = count;
+                    }
+                    Err(_) => {
+                        println!("'m' option should be an integer.");
+                        return;
+                    }
+                }
+            }
+            None => {
+                println!("Argument to option 'm' missing.");
+                return;
+            }
         }
-    }
-    else {
+    } else {
         max_answers_count = 5;
     }
 
@@ -70,7 +85,7 @@ fn main() {
     let left_answers: Vec<_> = answers.iter().take(max_answers_count).collect();
 
     for answer in left_answers.iter() {
-         println!("{}", answer);
-         println!("===-----===");
+        println!("{}", answer);
+        println!("===-----===");
     }
 }

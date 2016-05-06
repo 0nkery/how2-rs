@@ -12,7 +12,6 @@ use super::select::predicate::And;
 
 use super::regex::Regex;
 
-
 #[derive(Debug)]
 pub struct GoogleResult {
     pub link: String,

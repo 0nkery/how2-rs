@@ -115,9 +115,9 @@ impl StackExchangeApi {
 
         for (site, site_questions) in by_site.iter() {
             let question_ids: String = site_questions.iter()
-                                             .map(|q| q.id.to_string())
-                                             .collect::<Vec<_>>()
-                                             .join(";");
+                                                     .map(|q| q.id.to_string())
+                                                     .collect::<Vec<_>>()
+                                                     .join(";");
 
             let url = format!("{}://{}/{}/questions/{}/answers/?site={}&filter=withbody",
                               self.protocol,
