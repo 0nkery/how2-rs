@@ -13,7 +13,7 @@ use super::rustc_serialize::json::Json;
 
 use super::flate2::read::GzDecoder;
 
-use self::data::StackExchangeAnswer;
+pub use self::data::StackExchangeAnswer;
 use self::data::StackExchangeQuestion;
 
 
