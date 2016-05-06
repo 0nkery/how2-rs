@@ -133,3 +133,13 @@ fn stackexchange_works() {
     assert_eq!(answers.len(), 3);
     assert!(answers.iter().any(|a| a.answer_id == 22269167));
 }
+
+#[test]
+fn no_bad_results() {
+    let mut settings = How2RSSettings::default();
+    settings.query = String::from("rust lang is not awesome");
+
+    let answers = search(settings);
+
+    assert_eq!(answers.len(), 0);
+}
