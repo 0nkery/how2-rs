@@ -11,16 +11,16 @@ Another one - I want this tool to be more editor-friendly (without fancy UI and 
 
 # Installation
 
-Assuming you have Rustc and Cargo installed.
+1. Just download pre-built binary from `build` folder
+(don't forget to check for viruses). 
+
+2. Assuming you have Rustc and Cargo installed.
 
 ``` console
   git clone https://github.com/0nkery/how2-rs/
   cd how2-rs
   cargo build --release
 ```
-
-TODO: Build executables for some platforms. Maybe PPA or something?
-
 
 # Usage
 
