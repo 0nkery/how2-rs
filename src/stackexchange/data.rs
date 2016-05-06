@@ -6,13 +6,16 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct StackExchangeQuestion {
     pub id: u64,
-    pub site: String
+    pub site: String,
 }
 
 
 impl StackExchangeQuestion {
     pub fn new(id: u64, site: &str) -> Self {
-        StackExchangeQuestion { id: id, site: site.into() }
+        StackExchangeQuestion {
+            id: id,
+            site: site.into(),
+        }
     }
 }
 
@@ -40,7 +43,11 @@ impl StackExchangeAnswer {
             None => String::new(),
             Some(ref body) => {
                 let re = Regex::new(r"<.+?>").unwrap();
-                re.replace_all(&body, "")
+                let non_html = re.replace_all(&body, "");
+                let non_escaped = non_html.replace("&lt;", "<")
+                                          .replace("&gt;", ">");
+
+                non_escaped
             }
         }
     }
