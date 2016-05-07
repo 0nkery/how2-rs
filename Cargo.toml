@@ -1,6 +1,6 @@
 [package]
 name = "how2-rs"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Dmitry Shlagoff <wessmoke@mail.ru>"]
 
 [dependencies]

@@ -45,7 +45,8 @@ impl StackExchangeAnswer {
                 let re = Regex::new(r"<.+?>").unwrap();
                 let non_html = re.replace_all(&body, "");
                 let non_escaped = non_html.replace("&lt;", "<")
-                                          .replace("&gt;", ">");
+                                          .replace("&gt;", ">")
+                                          .replace("&amp;", "&");
 
                 non_escaped
             }
