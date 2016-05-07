@@ -30,11 +30,11 @@ Another one - I want this tool to be more editor-friendly (without fancy UI and 
 
 Available options:
 
-  - m, max-answers 
+  - -m, --max-answers 
 
     Maximum answers to retrieve (defaults to 5).
   
-  - h
+  - -h, --help
 
     Show this message and exit.
     
