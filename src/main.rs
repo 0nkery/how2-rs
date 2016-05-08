@@ -65,7 +65,7 @@ fn get_settings() -> How2RSSettings {
 
     if matches.opt_present("h") {
         print_usage(opts);
-        exit(1);
+        exit(0);
     }
 
     let mut settings = How2RSSettings::default();
