@@ -33,6 +33,10 @@ Available options:
   - -m, --max-answers 
 
     Maximum answers to retrieve (defaults to 5).
+    
+  - -j, --json
+  
+    Return answers json-encoded (defaults to false).
   
   - -h, --help
 
