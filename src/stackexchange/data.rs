@@ -38,7 +38,7 @@ pub struct StackExchangeAnswer {
 
 
 impl StackExchangeAnswer {
-    fn simple_print(&self) -> String {
+    pub fn simple_print(&self) -> String {
         match self.body {
             None => String::new(),
             Some(ref body) => {

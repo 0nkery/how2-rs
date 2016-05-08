@@ -123,9 +123,13 @@ fn search(settings: &How2RSSettings) -> Vec<StackExchangeAnswer> {
 
 fn main() {
     let settings = get_settings();
-    let answers = search(&settings);
+    let mut answers = search(&settings);
 
     if settings.json == true {
+        for answer in answers.iter_mut() {
+            let pretty_printed = answer.simple_print();
+            answer.body = Some(pretty_printed);
+        }  
         let encoded = json::encode(&answers).unwrap();
         println!("{}", encoded);
     } else {
