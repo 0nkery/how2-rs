@@ -52,7 +52,7 @@ fn get_settings() -> How2RSSettings {
                 "max-answers",
                 "Maximum answers to retrieve (defaults to 5).",
                 "COUNT");
-    opts.optflag("j", "json", "Return answers in json (defaults to false)");
+    opts.optflag("j", "json", "Return answers json-encoded (defaults to false)");
     opts.optflag("h", "help", "Show usage.");
 
     let matches = match opts.parse(&args[1..]) {
