@@ -20,14 +20,14 @@ impl StackExchangeQuestion {
 }
 
 
-#[derive(RustcDecodable, Debug)]
+#[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct StackExchangeUser {
     pub reputation: i32,
     pub accept_rate: Option<i32>,
 }
 
 
-#[derive(RustcDecodable, Debug)]
+#[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct StackExchangeAnswer {
     pub owner: StackExchangeUser,
     pub is_accepted: bool,

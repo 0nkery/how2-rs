@@ -13,6 +13,8 @@ use std::process::exit;
 
 use getopts::Options;
 
+use rustc_serialize::json;
+
 use google::Google;
 use stackexchange::StackExchangeApi;
 use stackexchange::StackExchangeAnswer;
@@ -21,14 +23,16 @@ use stackexchange::StackExchangeAnswer;
 #[derive(Debug)]
 struct How2RSSettings {
     max_answers_count: usize,
-    query: String
+    query: String,
+    json: bool,
 }
 
 impl Default for How2RSSettings {
     fn default() -> Self {
         How2RSSettings {
             max_answers_count: 5,
-            query: String::new()
+            query: String::new(),
+            json: false,
         }
     }
 }
@@ -48,6 +52,7 @@ fn get_settings() -> How2RSSettings {
                 "max-answers",
                 "Maximum answers to retrieve (defaults to 5).",
                 "COUNT");
+    opts.optflag("j", "json", "Return answers in json (defaults to false)");
     opts.optflag("h", "help", "Show usage.");
 
     let matches = match opts.parse(&args[1..]) {
@@ -64,6 +69,10 @@ fn get_settings() -> How2RSSettings {
     }
 
     let mut settings = How2RSSettings::default();
+
+    if matches.opt_present("j") {
+        settings.json = true;
+    }
 
     if matches.opt_present("m") {
         let count_cli = matches.opt_str("m");
@@ -92,7 +101,7 @@ fn get_settings() -> How2RSSettings {
 }
 
 
-fn search(settings: How2RSSettings) -> Vec<StackExchangeAnswer> {
+fn search(settings: &How2RSSettings) -> Vec<StackExchangeAnswer> {
     let google = Google::default();
     let links = google.google(&settings.query);
     let links_urls = links.iter()
@@ -114,11 +123,16 @@ fn search(settings: How2RSSettings) -> Vec<StackExchangeAnswer> {
 
 fn main() {
     let settings = get_settings();
-    let answers = search(settings);
+    let answers = search(&settings);
 
-    for answer in answers.iter() {
-        println!("{}", answer);
-        println!("===-----===");
+    if settings.json == true {
+        let encoded = json::encode(&answers).unwrap();
+        println!("{}", encoded);
+    } else {
+        for answer in answers.iter() {
+            println!("{}", answer);
+            println!("===-----===");
+        }
     }
 }
 
