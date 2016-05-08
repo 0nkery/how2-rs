@@ -97,10 +97,15 @@ impl Google {
                 continue;
             }
 
-            let clean_link = cleaning_regex.captures(&link_href)
-                                           .unwrap()
-                                           .name("link")
-                                           .unwrap();
+            let captures = cleaning_regex.captures(&link_href);
+            let clean_link: &str;
+
+            match captures {
+                Some(cap) => {
+                    clean_link = cap.name("link").unwrap();
+                }
+                None => continue,
+            }
 
             results.push(GoogleResult::new(&clean_link));
         }
