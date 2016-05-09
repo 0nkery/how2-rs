@@ -20,6 +20,8 @@ Another one - I want this tool to be more editor-friendly (without fancy UI and 
   git clone https://github.com/0nkery/how2-rs/
   cd how2-rs
   cargo build --release
+  # OR
+  cargo install
 ```
 
 # Usage
