@@ -42,11 +42,11 @@ impl StackExchangeAnswer {
         match self.body {
             None => String::new(),
             Some(ref body) => {
-                let re = Regex::new(r"<.+?>").unwrap();
+                let re = Regex::new(r"<.+?>").expect("Failed to initialize regex for HTML tags");
                 let non_html = re.replace_all(&body, "");
                 let non_escaped = non_html.replace("&lt;", "<")
-                                          .replace("&gt;", ">")
-                                          .replace("&amp;", "&");
+                    .replace("&gt;", ">")
+                    .replace("&amp;", "&");
 
                 non_escaped
             }

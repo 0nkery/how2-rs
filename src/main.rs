@@ -48,10 +48,7 @@ fn get_settings() -> How2RSSettings {
     let args: Vec<String> = env::args().collect();
 
     let mut opts = Options::new();
-    opts.optopt("m",
-                "max-answers",
-                "Maximum answers to retrieve (defaults to 5).",
-                "COUNT");
+    opts.optopt("m", "max-answers", "Maximum answers to retrieve (defaults to 5).", "COUNT");
     opts.optflag("j", "json", "Return answers json-encoded (defaults to false).");
     opts.optflag("h", "help", "Show usage.");
 
@@ -105,8 +102,8 @@ fn search(settings: &How2RSSettings) -> Vec<StackExchangeAnswer> {
     let google = Google::default();
     let links = google.google(&settings.query);
     let links_urls = links.iter()
-                          .map(|l| l.link.as_str())
-                          .collect();
+        .map(|l| l.link.as_str())
+        .collect();
 
     let api = StackExchangeApi::new();
 
@@ -114,8 +111,8 @@ fn search(settings: &How2RSSettings) -> Vec<StackExchangeAnswer> {
 
     answers.sort_by_key(|a| -a.score);
     let left_answers: Vec<_> = answers.drain(..)
-                                      .take(settings.max_answers_count)
-                                      .collect();
+        .take(settings.max_answers_count)
+        .collect();
 
     left_answers
 }
@@ -129,8 +126,8 @@ fn main() {
         for answer in answers.iter_mut() {
             let pretty_printed = answer.simple_print();
             answer.body = Some(pretty_printed);
-        }  
-        let encoded = json::encode(&answers).unwrap();
+        }
+        let encoded = json::encode(&answers).expect("Failed to encode answers in JSON");
         println!("{}", encoded);
     } else {
         for answer in answers.iter() {

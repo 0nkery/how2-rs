@@ -48,21 +48,23 @@ impl StackExchangeApi {
             let site;
 
             if url.contains("stackoverflow.com") {
-                let re = Regex::new(r".*stackoverflow.com/questions/(?P<q_id>\d+)/").unwrap();
-                let captures = re.captures(&url).unwrap();
-                question_id = captures.name("q_id").unwrap();
+                let re = Regex::new(r".*stackoverflow.com/questions/(?P<q_id>\d+)/")
+                    .expect("Failed to initialize regex for question id retrieval");
+                let captures = re.captures(&url).expect("Failed to match on URL");
+                question_id = captures.name("q_id").expect("Failed to extract question id");
                 site = "stackoverflow".into();
             } else if url.contains("stackexchange.com") {
                 let re = Regex::new(r".*//(?P<site>.*).stackexchange.com/questions/(?P<q_id>\d+)/")
-                             .unwrap();
-                let captures = re.captures(&url).unwrap();
-                question_id = captures.name("q_id").unwrap();
-                site = captures.name("site").unwrap();
+                    .expect("Failed to initialize regex for question id retrieval");
+                let captures = re.captures(&url).expect("Failed to match on URL");
+                question_id = captures.name("q_id").expect("Failed to retrieve question id");
+                site = captures.name("site").expect("Failed to retrieve site name");
             } else {
                 continue;
             }
 
-            let question_id: u64 = question_id.parse::<u64>().unwrap();
+            let question_id: u64 = question_id.parse::<u64>()
+                .expect("Question id is not an integer");
 
             questions.push(StackExchangeQuestion::new(question_id, site));
         }
@@ -71,31 +73,33 @@ impl StackExchangeApi {
 
     fn request(&self, url: &str) -> String {
         let mut res = self.client
-                          .get(url)
-                          .header(Connection::close())
-                          .send()
-                          .unwrap();
+            .get(url)
+            .header(Connection::close())
+            .send()
+            .expect("Failed to send request to StackExchange");
 
         let mut buffer = Vec::new();
-        res.read_to_end(&mut buffer).unwrap();
+        res.read_to_end(&mut buffer).expect("Failed to read gzipped response from StackExchange");
 
-        let mut gzip_decoder = GzDecoder::new(buffer.as_slice()).unwrap();
+        let mut gzip_decoder = GzDecoder::new(buffer.as_slice())
+            .expect("Failed to decode gzipped response");
         let mut body = String::new();
-        gzip_decoder.read_to_string(&mut body).unwrap();
+        gzip_decoder.read_to_string(&mut body).expect("Failed to read response from StackExchange");
 
         body
     }
 
     fn from_json(&self, json_str: &str) -> Vec<StackExchangeAnswer> {
-        let json = Json::from_str(&json_str).unwrap();
-        let data = json.as_object().unwrap();
-        let items = data.get("items").unwrap().as_array().unwrap();
+        let json = Json::from_str(&json_str).expect("Failed to encode StackExchange data to JSON");
+        let data = json.as_object().expect("Conversion to map failed");
+        let items = data.get("items")
+            .expect("Missing key 'items'")
+            .as_array()
+            .expect("Failed to convert 'items' to array");
 
         let answers: Vec<StackExchangeAnswer> = items.iter()
-                                                     .map(|i| {
-                                                         json::decode(&i.to_string()).unwrap()
-                                                     })
-                                                     .collect();
+            .map(|i| json::decode(&i.to_string()).expect("Failed to encode StackExchange answer"))
+            .collect();
 
         answers
     }
@@ -107,17 +111,17 @@ impl StackExchangeApi {
         for q in questions.iter() {
             if !by_site.contains_key(&q.site) {
                 let questions_same_site = questions.iter()
-                                                   .filter(|que| que.site == q.site)
-                                                   .collect::<Vec<_>>();
+                    .filter(|que| que.site == q.site)
+                    .collect::<Vec<_>>();
                 by_site.insert(&q.site, questions_same_site);
             }
         }
 
         for (site, site_questions) in by_site.iter() {
             let question_ids: String = site_questions.iter()
-                                                     .map(|q| q.id.to_string())
-                                                     .collect::<Vec<_>>()
-                                                     .join(";");
+                .map(|q| q.id.to_string())
+                .collect::<Vec<_>>()
+                .join(";");
 
             let url = format!("{}://{}/{}/questions/{}/answers/?site={}&filter=withbody",
                               self.protocol,

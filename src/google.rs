@@ -57,13 +57,13 @@ impl Google {
                           self.per_page);
 
         let mut res = self.client
-                          .get(&url)
-                          .header(Connection::close())
-                          .send()
-                          .unwrap();
+            .get(&url)
+            .header(Connection::close())
+            .send()
+            .expect("Failed to query Google");
 
         let mut body = String::new();
-        res.read_to_string(&mut body).unwrap();
+        res.read_to_string(&mut body).expect("Failed to read response from Google");
 
         body
     }
@@ -75,7 +75,7 @@ impl Google {
         let link_container_selector = And(Name("h3"), Class("r"));
         let link_selector = Name("a");
         let cleaning_regex = Regex::new(r"(/url\?q=)(?P<link>.*)&(sa=.*&?)(ved=.*&?)(usg=.*&?)")
-                                 .unwrap();
+            .expect("Failed to initialize cleaning Regex");
 
         let mut results = Vec::new();
 
@@ -90,8 +90,9 @@ impl Google {
                 }
             };
 
-            let link_node = link_container.find(link_selector).first().unwrap();
-            let link_href = link_node.attr("href").unwrap();
+            let link_node =
+                link_container.find(link_selector).first().expect("Failed to find 'a' node");
+            let link_href = link_node.attr("href").expect("Node 'a' has no 'href' attribute");
 
             if link_href.contains("/search?q=") {
                 continue;
@@ -102,7 +103,7 @@ impl Google {
 
             match captures {
                 Some(cap) => {
-                    clean_link = cap.name("link").unwrap();
+                    clean_link = cap.name("link").expect("Failed to extract link");
                 }
                 None => continue,
             }
